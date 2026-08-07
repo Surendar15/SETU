@@ -1,0 +1,458 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #FAFAF7;
+  --surface: #FFFFFF;
+  --surface-sunken: #F1F0EA;
+  --ink: #211F1A;
+  --ink-soft: #5B5850;
+  --line: #E4E1D8;
+
+  --pine: #1F4B3F;
+  --pine-dark: #163A30;
+  --pine-tint: #E7EFEC;
+
+  --gold: #E8A33D;
+  --gold-dark: #C6812A;
+  --gold-tint: #FBF0DD;
+
+  --clay: #B3432F;
+  --clay-tint: #F7E7E3;
+
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Work Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 2px rgba(33, 31, 26, 0.04), 0 4px 16px rgba(33, 31, 26, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+
+a {
+  color: var(--pine);
+}
+
+/* --- Layout shells --- */
+.page-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+.container-narrow {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+/* --- Auth pages --- */
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  background: var(--bg);
+}
+
+@media (max-width: 860px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+  .auth-visual {
+    display: none;
+  }
+}
+
+.auth-visual {
+  background: var(--pine);
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-visual h1 {
+  color: #FFFFFF;
+  font-size: 40px;
+  line-height: 1.15;
+  max-width: 420px;
+}
+
+.auth-visual p {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 380px;
+  margin-top: 16px;
+}
+
+.auth-form-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold-dark);
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* --- Waypoint chain (signature element) --- */
+.waypoint-chain {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 40px;
+}
+
+.waypoint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.waypoint-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.waypoint-dot.active {
+  background: var(--gold);
+  box-shadow: 0 0 0 4px rgba(232, 163, 61, 0.2);
+}
+
+.waypoint-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.waypoint-line {
+  width: 32px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.25);
+  margin: 0 10px;
+}
+
+/* --- Form elements --- */
+.field {
+  margin-bottom: 16px;
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.input, select.input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input:focus, select.input:focus {
+  outline: none;
+  border-color: var(--pine);
+  box-shadow: 0 0 0 3px var(--pine-tint);
+}
+
+.input:disabled {
+  background: var(--surface-sunken);
+  color: var(--ink-soft);
+}
+
+.field-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.field-row .input {
+  flex: 1;
+}
+
+/* --- Buttons --- */
+.btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  padding: 11px 18px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--pine);
+  color: #FFFFFF;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--pine-dark);
+}
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--ink);
+}
+.btn-gold:hover:not(:disabled) {
+  background: var(--gold-dark);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--pine);
+  border: 1px solid var(--line);
+}
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--pine);
+  background: var(--pine-tint);
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn-sm {
+  padding: 7px 12px;
+  font-size: 13px;
+}
+
+/* --- Messages --- */
+.msg-error {
+  color: var(--clay);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.msg-success {
+  color: var(--pine);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.banner-error {
+  background: var(--clay-tint);
+  color: var(--clay);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 13px;
+  margin: 16px 0;
+}
+
+/* --- Top nav --- */
+.topnav {
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.topnav-inner {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--pine);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.role-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--pine-tint);
+  color: var(--pine-dark);
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+.user-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-name {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+/* --- Cards --- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.card + .card {
+  margin-top: 12px;
+}
+
+.section-title {
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.section-block {
+  margin-top: 32px;
+}
+
+/* --- Tabs --- */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+}
+
+.tab {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 4px;
+  margin-right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tab.active {
+  color: var(--pine);
+  border-bottom-color: var(--gold);
+}
+
+/* --- Status waypoint badge (used in dashboards) --- */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-available { background: var(--pine-tint); color: var(--pine-dark); }
+.status-available .status-dot { background: var(--pine); }
+
+.status-pending, .status-requested { background: var(--gold-tint); color: var(--gold-dark); }
+.status-pending .status-dot, .status-requested .status-dot { background: var(--gold); }
+
+.status-assigned, .status-picked_up, .status-in_transit { background: #E9EEF5; color: #2A4E7A; }
+.status-assigned .status-dot, .status-picked_up .status-dot, .status-in_transit .status-dot { background: #3E6FA8; }
+
+.status-delivered, .status-accepted { background: var(--pine-tint); color: var(--pine-dark); }
+.status-delivered .status-dot, .status-accepted .status-dot { background: var(--pine); }
+
+.status-cancelled, .status-rejected { background: var(--surface-sunken); color: var(--ink-soft); }
+.status-cancelled .status-dot, .status-rejected .status-dot { background: var(--ink-soft); }
+
+/* --- Empty states --- */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+/* --- Misc text --- */
+.meta {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
