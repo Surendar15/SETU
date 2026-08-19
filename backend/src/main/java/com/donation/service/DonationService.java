@@ -3,14 +3,19 @@ package com.donation.service;
 import com.donation.dto.CreateDonationRequest;
 import com.donation.dto.DonationResponse;
 import com.donation.entity.Donation;
+import com.donation.entity.DonationRequest;
 import com.donation.entity.DonationStatus;
+import com.donation.entity.RequestStatus;
 import com.donation.entity.User;
+import com.donation.repository.DeliveryRepository;
 import com.donation.repository.DonationRepository;
+import com.donation.repository.DonationRequestRepository;
 import com.donation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +23,10 @@ public class DonationService {
 
     private final DonationRepository donationRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final GeocodingService geocodingService;
+    private final DeliveryRepository deliveryRepository;
+    private final DonationRequestRepository donationRequestRepository;
 
     public DonationResponse createDonation(Long donorId, CreateDonationRequest request) {
         User donor = userRepository.findById(donorId)
@@ -33,8 +42,20 @@ public class DonationService {
                 .status(DonationStatus.AVAILABLE)
                 .build();
 
-        donation = donationRepository.save(donation);
-        return toResponse(donation);
+        Optional<GeocodingService.Coordinates> coords = geocodingService.geocode(request.getPickupAddress());
+        if (coords.isPresent()) {
+            donation.setLatitude(coords.get().latitude());
+            donation.setLongitude(coords.get().longitude());
+        }
+
+        Donation savedDonation = donationRepository.save(donation);
+
+        notificationService.broadcast(
+                "new-donations",
+                donor.getName() + " posted a new donation: " + savedDonation.getDescription()
+        );
+
+        return toResponse(savedDonation);
     }
 
     public List<DonationResponse> getAvailableDonations() {
@@ -61,7 +82,6 @@ public class DonationService {
         Donation donation = donationRepository.findById(donationId)
                 .orElseThrow(() -> new IllegalArgumentException("Donation not found"));
 
-        // Ownership check - a donor can only cancel their own donation
         if (!donation.getDonor().getId().equals(donorId)) {
             throw new IllegalArgumentException("You do not own this donation");
         }
@@ -72,9 +92,30 @@ public class DonationService {
 
         donation.setStatus(DonationStatus.CANCELLED);
         donationRepository.save(donation);
+
+        // Any orphanage with a still-pending request on this donation needs to
+        // see it as cancelled too, not left hanging as "PENDING" forever.
+        List<DonationRequest> pendingRequests = donationRequestRepository.findByDonationId(donationId)
+                .stream()
+                .filter(r -> r.getStatus() == RequestStatus.PENDING)
+                .toList();
+
+        for (DonationRequest request : pendingRequests) {
+            request.setStatus(RequestStatus.CANCELLED);
+            donationRequestRepository.save(request);
+
+            notificationService.notifyUser(
+                    request.getOrphanage().getEmail(),
+                    "The donation \"" + donation.getDescription() + "\" you requested was cancelled by the donor."
+            );
+        }
     }
 
     private DonationResponse toResponse(Donation donation) {
+        Long deliveryId = deliveryRepository.findByDonationId(donation.getId())
+                .map(d -> d.getId())
+                .orElse(null);
+
         return DonationResponse.builder()
                 .id(donation.getId())
                 .donorId(donation.getDonor().getId())
@@ -84,8 +125,11 @@ public class DonationService {
                 .quantity(donation.getQuantity())
                 .imageUrl(donation.getImageUrl())
                 .pickupAddress(donation.getPickupAddress())
+                .latitude(donation.getLatitude())
+                .longitude(donation.getLongitude())
                 .status(donation.getStatus())
                 .createdAt(donation.getCreatedAt())
+                .deliveryId(deliveryId)
                 .build();
     }
 }

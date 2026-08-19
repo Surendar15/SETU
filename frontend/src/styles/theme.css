@@ -447,7 +447,81 @@ a {
   font-size: 14px;
 }
 
-/* --- Misc text --- */
+/* --- Donation progress tracker (light background version of waypoint chain) --- */
+.progress-track {
+  display: flex;
+  align-items: center;
+  margin: 16px 0 4px;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  position: relative;
+}
+
+.progress-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--surface-sunken);
+  border: 2px solid var(--line);
+  z-index: 1;
+}
+
+.progress-dot.done {
+  background: var(--pine);
+  border-color: var(--pine);
+}
+
+.progress-dot.current {
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px var(--gold-tint);
+}
+
+.progress-line {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--line);
+  z-index: 0;
+}
+
+.progress-line.done {
+  background: var(--pine);
+}
+
+.progress-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.progress-label.active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* --- Donation card with a real image banner --- */
+.donation-image-banner {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius) var(--radius) 0 0;
+  display: block;
+  margin: -24px -24px 16px -24px;
+  width: calc(100% + 48px);
+}
+
 .meta {
   font-size: 13px;
   color: var(--ink-soft);
@@ -455,4 +529,67 @@ a {
 
 .mono {
   font-family: var(--font-mono);
+}
+
+/* --- Impact stats (landing page) --- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+@media (max-width: 700px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stat-cell {
+  background: var(--surface);
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.stat-number {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 600;
+  color: var(--pine);
+  line-height: 1;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 8px;
+}
+/* --- Demo video panel (landing page) --- */
+.demo-video-box {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius);
+  padding: 10px;
+  backdrop-filter: blur(2px);
+}
+
+.demo-video-caption {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  margin-top: 8px;
+}
+
+@media (max-width: 860px) {
+  .demo-video-box {
+    margin-top: 24px;
+  }
 }

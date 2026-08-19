@@ -39,6 +39,10 @@ public class Donation {
     @Column(name = "pickup_address", length = 255)
     private String pickupAddress;
 
+    private Double latitude;
+
+    private Double longitude;
+
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private DonationStatus status = DonationStatus.AVAILABLE;

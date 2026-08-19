@@ -23,6 +23,9 @@ public class DonationResponse {
     private String quantity;
     private String imageUrl;
     private String pickupAddress;
+    private Double latitude;
+    private Double longitude;
     private DonationStatus status;
     private LocalDateTime createdAt;
+    private Long deliveryId; // null until an orphanage's request is accepted
 }

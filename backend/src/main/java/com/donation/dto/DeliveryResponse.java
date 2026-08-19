@@ -18,6 +18,10 @@ public class DeliveryResponse {
     private Long donationId;
     private String donationDescription;
     private String pickupAddress;
+    private Double latitude;
+    private Double longitude;
+    private Long donorId;
+    private String donorName;
     private Long volunteerId;
     private String volunteerName;
     private Long orphanageId;

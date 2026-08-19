@@ -41,6 +41,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // let CORS preflight through
                 .requestMatchers("/error").permitAll() // let internal error forwards through instead of masking as 403
+                .requestMatchers("/ws/**").permitAll() // WebSocket handshake - authenticated via STOMP CONNECT frame instead
+                .requestMatchers("/api/stats/**").permitAll() // public impact stats for the landing page
                 .requestMatchers("/api/health", "/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )

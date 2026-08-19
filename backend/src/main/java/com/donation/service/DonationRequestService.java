@@ -20,6 +20,7 @@ public class DonationRequestService {
     private final DonationRepository donationRepository;
     private final UserRepository userRepository;
     private final DeliveryRepository deliveryRepository;
+    private final NotificationService notificationService;
 
     public DonationRequestResponse createRequest(Long orphanageId, CreateRequestDto dto) {
         Donation donation = donationRepository.findById(dto.getDonationId())
@@ -27,6 +28,17 @@ public class DonationRequestService {
 
         if (donation.getStatus() != DonationStatus.AVAILABLE) {
             throw new IllegalArgumentException("This donation is no longer available");
+        }
+
+        // If the donor already rejected this same orphanage for this donation,
+        // don't let them request it again.
+        boolean previouslyRejected = donationRequestRepository.findByDonationId(dto.getDonationId())
+                .stream()
+                .anyMatch(r -> r.getOrphanage().getId().equals(orphanageId)
+                        && r.getStatus() == RequestStatus.REJECTED);
+
+        if (previouslyRejected) {
+            throw new IllegalArgumentException("The donor already declined your request for this donation");
         }
 
         User orphanage = userRepository.findById(orphanageId)
@@ -39,10 +51,13 @@ public class DonationRequestService {
                 .build();
         request = donationRequestRepository.save(request);
 
-        // Mark the donation as having an active request so other orphanages
-        // see it's no longer freely available (still not yet ASSIGNED to a volunteer)
         donation.setStatus(DonationStatus.REQUESTED);
         donationRepository.save(donation);
+
+        notificationService.notifyUser(
+                donation.getDonor().getEmail(),
+                orphanage.getName() + " requested your donation: " + donation.getDescription()
+        );
 
         return toResponse(request);
     }
@@ -68,11 +83,6 @@ public class DonationRequestService {
                 .toList();
     }
 
-    /**
-     * Donor accepts a request: the request is marked ACCEPTED, the donation
-     * moves to ASSIGNED, and a Delivery row is created (with no volunteer yet -
-     * volunteers browse open deliveries and pick one up in the next step).
-     */
     public DonationRequestResponse acceptRequest(Long donorId, Long requestId) {
         DonationRequest request = donationRequestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("Request not found"));
@@ -95,6 +105,15 @@ public class DonationRequestService {
                 .build();
         deliveryRepository.save(delivery);
 
+        notificationService.notifyUser(
+                request.getOrphanage().getEmail(),
+                "Your request for \"" + donation.getDescription() + "\" was accepted! A volunteer will be assigned soon."
+        );
+        notificationService.broadcast(
+                "open-deliveries",
+                "A new delivery is available: " + donation.getDescription()
+        );
+
         return toResponse(request);
     }
 
@@ -110,9 +129,16 @@ public class DonationRequestService {
         request.setStatus(RequestStatus.REJECTED);
         donationRequestRepository.save(request);
 
-        // Reopen the donation so other orphanages can request it again
+        // Reopen the donation so OTHER orphanages can still request it -
+        // the rejected orphanage specifically is blocked from re-requesting
+        // by the check in createRequest above.
         donation.setStatus(DonationStatus.AVAILABLE);
         donationRepository.save(donation);
+
+        notificationService.notifyUser(
+                request.getOrphanage().getEmail(),
+                "Your request for \"" + donation.getDescription() + "\" was declined by the donor."
+        );
 
         return toResponse(request);
     }

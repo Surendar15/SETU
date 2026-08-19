@@ -20,8 +20,8 @@ public class DeliveryService {
     private final DonationRepository donationRepository;
     private final UserRepository userRepository;
     private final VolunteerDetailsRepository volunteerDetailsRepository;
+    private final NotificationService notificationService;
 
-    // Deliveries that a donor has accepted but no volunteer has claimed yet
     public List<DeliveryResponse> getOpenDeliveries() {
         return deliveryRepository.findByVolunteerIsNull()
                 .stream()
@@ -57,14 +57,18 @@ public class DeliveryService {
         delivery.setVolunteer(volunteer);
         deliveryRepository.save(delivery);
 
+        notificationService.notifyUser(
+                delivery.getOrphanage().getEmail(),
+                volunteer.getName() + " will deliver your donation: " + delivery.getDonation().getDescription()
+        );
+        notificationService.notifyUser(
+                delivery.getDonation().getDonor().getEmail(),
+                volunteer.getName() + " picked up your donation for delivery: " + delivery.getDonation().getDescription()
+        );
+
         return toResponse(delivery);
     }
 
-    /**
-     * Moves a delivery through PICKED_UP -> IN_TRANSIT -> DELIVERED.
-     * Keeps the linked Donation's status in sync, and on final delivery,
-     * bumps the volunteer's total delivery count.
-     */
     public DeliveryResponse updateStatus(Long volunteerId, Long deliveryId, DeliveryStatus newStatus) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(() -> new IllegalArgumentException("Delivery not found"));
@@ -81,11 +85,12 @@ public class DeliveryService {
         if (newStatus == DeliveryStatus.PICKED_UP) {
             delivery.setPickupTime(LocalDateTime.now());
             donation.setStatus(DonationStatus.PICKED_UP);
+        } else if (newStatus == DeliveryStatus.IN_TRANSIT) {
+            donation.setStatus(DonationStatus.IN_TRANSIT);
         } else if (newStatus == DeliveryStatus.DELIVERED) {
             delivery.setDeliveryTime(LocalDateTime.now());
             donation.setStatus(DonationStatus.DELIVERED);
 
-            // Bump the volunteer's completed delivery count
             volunteerDetailsRepository.findById(volunteerId).ifPresent(details -> {
                 details.setTotalDeliveries(details.getTotalDeliveries() + 1);
                 volunteerDetailsRepository.save(details);
@@ -95,6 +100,15 @@ public class DeliveryService {
         donationRepository.save(donation);
         deliveryRepository.save(delivery);
 
+        notificationService.notifyUser(
+                delivery.getOrphanage().getEmail(),
+                "Delivery update: \"" + donation.getDescription() + "\" is now " + newStatus.name().replace("_", " ")
+        );
+        notificationService.notifyUser(
+                donation.getDonor().getEmail(),
+                "Delivery update: \"" + donation.getDescription() + "\" is now " + newStatus.name().replace("_", " ")
+        );
+
         return toResponse(delivery);
     }
 
@@ -103,7 +117,7 @@ public class DeliveryService {
             case PENDING_PICKUP -> next == DeliveryStatus.PICKED_UP;
             case PICKED_UP -> next == DeliveryStatus.IN_TRANSIT;
             case IN_TRANSIT -> next == DeliveryStatus.DELIVERED;
-            case DELIVERED -> false; // terminal state, no further transitions
+            case DELIVERED -> false;
         };
 
         if (!valid) {
@@ -118,6 +132,10 @@ public class DeliveryService {
                 .donationId(delivery.getDonation().getId())
                 .donationDescription(delivery.getDonation().getDescription())
                 .pickupAddress(delivery.getDonation().getPickupAddress())
+                .latitude(delivery.getDonation().getLatitude())
+                .longitude(delivery.getDonation().getLongitude())
+                .donorId(delivery.getDonation().getDonor().getId())
+                .donorName(delivery.getDonation().getDonor().getName())
                 .volunteerId(delivery.getVolunteer() != null ? delivery.getVolunteer().getId() : null)
                 .volunteerName(delivery.getVolunteer() != null ? delivery.getVolunteer().getName() : null)
                 .orphanageId(delivery.getOrphanage().getId())
