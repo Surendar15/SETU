@@ -20,12 +20,18 @@ public class DeliveryResponse {
     private String pickupAddress;
     private Double latitude;
     private Double longitude;
+    private String category;
+    private Boolean isUrgent;
+    private LocalDateTime expiresAt;
     private Long donorId;
     private String donorName;
     private Long volunteerId;
     private String volunteerName;
     private Long orphanageId;
     private String orphanageName;
+    private String orphanageAddress;
+    private Double orphanageLatitude;
+    private Double orphanageLongitude;
     private DeliveryStatus status;
     private LocalDateTime pickupTime;
     private LocalDateTime deliveryTime;

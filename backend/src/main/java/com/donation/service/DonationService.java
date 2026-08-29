@@ -32,6 +32,12 @@ public class DonationService {
         User donor = userRepository.findById(donorId)
                 .orElseThrow(() -> new IllegalArgumentException("Donor not found"));
 
+        Boolean isUrgent = Boolean.TRUE.equals(request.getIsUrgent());
+        java.time.LocalDateTime expiresAt = null;
+        if (request.getExpiryHours() != null && request.getExpiryHours() > 0) {
+            expiresAt = java.time.LocalDateTime.now().plusHours(request.getExpiryHours());
+        }
+
         Donation donation = Donation.builder()
                 .donor(donor)
                 .category(request.getCategory())
@@ -39,6 +45,8 @@ public class DonationService {
                 .quantity(request.getQuantity())
                 .imageUrl(request.getImageUrl())
                 .pickupAddress(request.getPickupAddress())
+                .isUrgent(isUrgent)
+                .expiresAt(expiresAt)
                 .status(DonationStatus.AVAILABLE)
                 .build();
 
@@ -128,6 +136,8 @@ public class DonationService {
                 .latitude(donation.getLatitude())
                 .longitude(donation.getLongitude())
                 .status(donation.getStatus())
+                .isUrgent(donation.getIsUrgent())
+                .expiresAt(donation.getExpiresAt())
                 .createdAt(donation.getCreatedAt())
                 .deliveryId(deliveryId)
                 .build();

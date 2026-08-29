@@ -47,6 +47,13 @@ public class Donation {
     @Builder.Default
     private DonationStatus status = DonationStatus.AVAILABLE;
 
+    @Column(name = "is_urgent")
+    @Builder.Default
+    private Boolean isUrgent = false;
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

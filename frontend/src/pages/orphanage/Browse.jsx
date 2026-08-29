@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import MapPreview from "../../components/MapPreview";
+import ExpiryTimer from "../../components/ExpiryTimer";
 import { useNotifications } from "../../context/NotificationContext";
 import { getAvailableDonations, createRequest, getMyRequests } from "../../api/deliveryApi";
 import { getRatingSummary } from "../../api/ratingApi";
@@ -12,6 +12,7 @@ export default function Browse() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [requestingId, setRequestingId] = useState(null);
+  const [urgentOnly, setUrgentOnly] = useState(false);
 
   const load = async () => {
     try {
@@ -56,20 +57,38 @@ export default function Browse() {
     }
   };
 
+  const filteredDonations = urgentOnly
+    ? donations.filter((d) => d.isUrgent)
+    : [...donations].sort((a, b) => (b.isUrgent ? 1 : 0) - (a.isUrgent ? 1 : 0));
+
   return (
     <div style={{ marginTop: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 700 }}>Available Donations</h2>
+        <button
+          className={`btn btn-sm ${urgentOnly ? "btn-primary" : "btn-outline"}`}
+          onClick={() => setUrgentOnly((prev) => !prev)}
+        >
+          {urgentOnly ? "⚡ Showing Urgent Only" : "⚡ Filter Urgent First"}
+        </button>
+      </div>
+
       {error && <div className="banner-error">{error}</div>}
       {loading ? (
         <p className="meta">Loading...</p>
-      ) : donations.length === 0 ? (
+      ) : filteredDonations.length === 0 ? (
         <div className="card empty-state">No donations available right now.</div>
       ) : (
-        donations.map((d) => (
+        filteredDonations.map((d) => (
           <div key={d.id} className="card">
             {d.imageUrl && <img src={d.imageUrl} alt={d.description} className="donation-image-banner" />}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
               <div>
-                <strong>{d.category}</strong> — {d.description || "No description"}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
+                  <strong>{d.category}</strong>
+                  <ExpiryTimer expiresAt={d.expiresAt} isUrgent={d.isUrgent} />
+                </div>
+                <div>{d.description || "No description"}</div>
                 <div className="meta" style={{ marginTop: 4 }}>
                   Qty: {d.quantity || "N/A"} · From {d.donorName}
                   {donorRatings[d.donorId] && donorRatings[d.donorId].totalRatings > 0 && (
@@ -79,7 +98,6 @@ export default function Browse() {
                   )}
                 </div>
                 <div className="meta">Pickup: {d.pickupAddress}</div>
-                <MapPreview latitude={d.latitude} longitude={d.longitude} label={d.pickupAddress} />
               </div>
               {rejectedDonationIds.has(d.id) ? (
                 <span className="meta" style={{ fontStyle: "italic" }}>Previously declined</span>

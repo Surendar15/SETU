@@ -26,6 +26,8 @@ public class DonationResponse {
     private Double latitude;
     private Double longitude;
     private DonationStatus status;
+    private Boolean isUrgent;
+    private LocalDateTime expiresAt;
     private LocalDateTime createdAt;
     private Long deliveryId; // null until an orphanage's request is accepted
 }

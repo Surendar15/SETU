@@ -13,4 +13,6 @@ public interface DonationRepository extends JpaRepository<Donation, Long> {
     List<Donation> findByDonorId(Long donorId);
 
     long countByStatus(DonationStatus status);
+
+    long countByIsUrgentTrue();
 }

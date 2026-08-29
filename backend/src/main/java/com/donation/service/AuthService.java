@@ -81,13 +81,21 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        // This throws BadCredentialsException automatically if email/password don't match
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+        String identifier = request.getEmail().trim();
+        User user = userRepository.findByEmail(identifier)
+                .or(() -> userRepository.findByPhone(identifier))
+                .or(() -> {
+                    String withPrefix = identifier.startsWith("+91") ? identifier : "+91 " + identifier;
+                    String withoutPrefix = identifier.replace("+91", "").trim();
+                    return userRepository.findByPhone(withPrefix)
+                            .or(() -> userRepository.findByPhone(withoutPrefix));
+                })
+                .orElseThrow(() -> new IllegalArgumentException("User not found with provided email or mobile number"));
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        // Authenticate with the user's primary email or resolved principal
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getEmail(), request.getPassword())
+        );
 
         String token = jwtUtil.generateToken(new CustomUserDetails(user));
 
@@ -98,5 +106,13 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();
+    }
+
+    public void resetPassword(com.donation.dto.ResetPasswordRequest request) {
+        otpService.verifyOtp(request.getEmail(), request.getOtp());
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + request.getEmail()));
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 }

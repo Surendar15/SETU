@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNotifications } from "../../context/NotificationContext";
 import ChatPanel from "../../components/ChatPanel";
+import ExpiryTimer from "../../components/ExpiryTimer";
 import {
   getMyDonations,
   cancelDonation,
@@ -148,7 +149,11 @@ export default function MyDonations() {
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
-                  <strong>{d.category}</strong> — {d.description || "No description"}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 4 }}>
+                    <strong>{d.category}</strong>
+                    <ExpiryTimer expiresAt={d.expiresAt} isUrgent={d.isUrgent} />
+                  </div>
+                  <div>{d.description || "No description"}</div>
                   <div className="meta" style={{ marginTop: 4 }}>Qty: {d.quantity || "N/A"}</div>
                 </div>
                 <span className={`status status-${d.status.toLowerCase()}`}>

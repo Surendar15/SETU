@@ -95,9 +95,9 @@ export default function MyDeliveries() {
                 </div>
               </div>
 
-              <div style={{ marginTop: 10 }}>
+              <div style={{ marginTop: 12 }}>
                 <button className="btn btn-outline btn-sm" onClick={() => setOpenChatId(openChatId === d.id ? null : d.id)}>
-                  {openChatId === d.id ? "Hide chat" : "Chat"}
+                  {openChatId === d.id ? "Hide chat" : "💬 Delivery Chat"}
                 </button>
               </div>
 

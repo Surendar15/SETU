@@ -15,9 +15,16 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("No user found with email: " + email));
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(identifier)
+                .or(() -> userRepository.findByPhone(identifier))
+                .or(() -> {
+                    String withPrefix = identifier.startsWith("+91") ? identifier : "+91 " + identifier;
+                    String withoutPrefix = identifier.replace("+91", "").trim();
+                    return userRepository.findByPhone(withPrefix)
+                            .or(() -> userRepository.findByPhone(withoutPrefix));
+                })
+                .orElseThrow(() -> new UsernameNotFoundException("No user found with identifier: " + identifier));
         return new CustomUserDetails(user);
     }
 }

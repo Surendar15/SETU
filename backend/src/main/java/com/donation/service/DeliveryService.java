@@ -127,19 +127,28 @@ public class DeliveryService {
     }
 
     private DeliveryResponse toResponse(Delivery delivery) {
+        Donation donation = delivery.getDonation();
+        User orphanage = delivery.getOrphanage();
+
         return DeliveryResponse.builder()
                 .id(delivery.getId())
-                .donationId(delivery.getDonation().getId())
-                .donationDescription(delivery.getDonation().getDescription())
-                .pickupAddress(delivery.getDonation().getPickupAddress())
-                .latitude(delivery.getDonation().getLatitude())
-                .longitude(delivery.getDonation().getLongitude())
-                .donorId(delivery.getDonation().getDonor().getId())
-                .donorName(delivery.getDonation().getDonor().getName())
+                .donationId(donation.getId())
+                .donationDescription(donation.getDescription())
+                .pickupAddress(donation.getPickupAddress())
+                .latitude(donation.getLatitude())
+                .longitude(donation.getLongitude())
+                .category(donation.getCategory() != null ? donation.getCategory().name() : null)
+                .isUrgent(donation.getIsUrgent())
+                .expiresAt(donation.getExpiresAt())
+                .donorId(donation.getDonor().getId())
+                .donorName(donation.getDonor().getName())
                 .volunteerId(delivery.getVolunteer() != null ? delivery.getVolunteer().getId() : null)
                 .volunteerName(delivery.getVolunteer() != null ? delivery.getVolunteer().getName() : null)
-                .orphanageId(delivery.getOrphanage().getId())
-                .orphanageName(delivery.getOrphanage().getName())
+                .orphanageId(orphanage.getId())
+                .orphanageName(orphanage.getName())
+                .orphanageAddress(orphanage.getAddress())
+                .orphanageLatitude(orphanage.getLatitude())
+                .orphanageLongitude(orphanage.getLongitude())
                 .status(delivery.getStatus())
                 .pickupTime(delivery.getPickupTime())
                 .deliveryTime(delivery.getDeliveryTime())

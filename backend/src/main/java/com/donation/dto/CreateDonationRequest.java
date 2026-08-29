@@ -17,4 +17,8 @@ public class CreateDonationRequest {
     private String imageUrl;
 
     private String pickupAddress;
+
+    private Boolean isUrgent;
+
+    private Integer expiryHours;
 }
